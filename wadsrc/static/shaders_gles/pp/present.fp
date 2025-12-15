@@ -1,8 +1,10 @@
 
-varying vec2 TexCoord;
+in vec2 TexCoord;
 
 uniform sampler2D InputTexture;
 uniform sampler2D DitherTexture;
+
+out vec4 outFragColor;
 
 vec4 ApplyGamma(vec4 c)
 {
@@ -28,5 +30,5 @@ vec4 ApplyGamma(vec4 c)
 
 void main()
 {
-	gl_FragColor =  ApplyGamma(texture2D(InputTexture, UVOffset + TexCoord * UVScale));
+	outFragColor =  ApplyGamma(texture(InputTexture, UVOffset + TexCoord * UVScale));
 }

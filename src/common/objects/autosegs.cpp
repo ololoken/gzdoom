@@ -58,6 +58,16 @@
 
 #define AUTOSEG_VARIABLE(name, autoseg) namespace AutoSegs{ FAutoSeg name{ AUTOSEG_STR(autoseg) }; }
 
+#elif defined(__EMSCRIPTEN__)
+
+#define AUTOSEG_START(name) __start_##name
+#define AUTOSEG_STOP(name) __stop_##name
+#define AUTOSEG_VARIABLE(name, autoseg) \
+	void* name##DummyPointer __attribute__((section(AUTOSEG_STR(autoseg)))) __attribute__((aligned(1))) __attribute__((used)); \
+	extern void* AUTOSEG_START(autoseg); \
+	extern void* AUTOSEG_STOP(autoseg); \
+	namespace AutoSegs { FAutoSeg name{ &AUTOSEG_START(autoseg), &AUTOSEG_STOP(autoseg) }; }
+
 #else // Linux and others with ELF executables
 
 #define AUTOSEG_START(name) __start_##name

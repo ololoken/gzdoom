@@ -57,7 +57,9 @@ EXTERN_CVAR(Bool, r_radarclipper)
 EXTERN_CVAR(Bool, r_dithertransparency)
 
 thread_local bool isWorkerThread;
+#ifndef __EMSCRIPTEN__
 ctpl::thread_pool renderPool(1);
+#endif
 bool inited = false;
 
 const int MAXDITHERACTORS = 20; // Maximum number of enemies that can set dither-transparency flags
@@ -1026,7 +1028,7 @@ void HWDrawInfo::RenderBSP(void *node, bool drawpsprites)
 	}
 
 	validcount++;	// used for processing sidedefs only once by the renderer.
-
+#ifndef __EMSCRIPTEN__
 	multithread = gl_multithread;
 	if (multithread)
 	{
@@ -1044,6 +1046,7 @@ void HWDrawInfo::RenderBSP(void *node, bool drawpsprites)
 		MTWait.Unclock();
 	}
 	else
+#endif
 	{
 		if (Viewpoint.bDoOrtho && ((Level->flags3 & LEVEL3_NOFOGOFWAR) || !r_radarclipper)) RenderOrthoNoFog();
 		else RenderBSPNode(node);

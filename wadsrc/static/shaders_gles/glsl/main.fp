@@ -1,17 +1,18 @@
 
-varying vec4 vTexCoord;
-varying vec4 vColor;
-varying vec4 pixelpos;
-varying vec3 glowdist;
-varying vec3 gradientdist;
-varying vec4 vWorldNormal;
-varying vec4 vEyeNormal;
+in vec4 vTexCoord;
+in vec4 vColor;
+in vec4 pixelpos;
+in vec3 glowdist;
+in vec3 gradientdist;
+in vec4 vWorldNormal;
+in vec4 vEyeNormal;
 
 #ifdef NO_CLIPDISTANCE_SUPPORT
-varying vec4 ClipDistanceA;
-varying vec4 ClipDistanceB;
+in vec4 ClipDistanceA;
+in vec4 ClipDistanceB;
 #endif
 
+out vec4 outFragColor;
 
 struct Material
 {
@@ -160,8 +161,7 @@ const int Tex_Blend_Hardlight = 4;
 
 vec4 getTexel(vec2 st)
 {
-	vec4 texel = texture2D(tex, st);
-	
+	vec4 texel = texture(tex, st);
 #if (DEF_TEXTURE_MODE == 1)
 
 	texel.rgb = vec3(1.0,1.0,1.0);
@@ -345,19 +345,19 @@ void SetMaterialProps(inout Material material, vec2 texCoord)
 	material.Normal = ApplyNormalMap(texCoord.st);
 
 	#if (DEF_TEXTURE_FLAGS & 0x1)
-		material.Bright = texture2D(brighttexture, texCoord.st);
+		material.Bright = texture(brighttexture, texCoord.st);
 	#endif
 
 	#if (DEF_TEXTURE_FLAGS & 0x2)
 	{
-		vec4 Detail = texture2D(detailtexture, texCoord.st * uDetailParms.xy) * uDetailParms.z;
+		vec4 Detail = texture(detailtexture, texCoord.st * uDetailParms.xy) * uDetailParms.z;
 		material.Base *= Detail;
 	}
 	#endif
 
 	#if (DEF_TEXTURE_FLAGS & 0x4)
 	{
-		material.Glow = texture2D(glowtexture, texCoord.st);
+		material.Glow = texture(glowtexture, texCoord.st);
 	}
 	#endif
 
@@ -571,7 +571,7 @@ void main()
 	}
 #endif
 
-	gl_FragColor = frag;
+	outFragColor = frag;
 
 	//gl_FragColor = vec4(0.8, 0.2, 0.5, 1);
 

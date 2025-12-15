@@ -354,15 +354,18 @@ if( MSVC AND NOT VPX_FOUND )
 	endif()
 	set( VPX_FOUND TRUE )
 endif()
-
-if( VPX_FOUND )
+if(CMAKE_SYSTEM MATCHES "Emscripten")
 	add_definitions( "-DUSE_LIBVPX=1" )
-	include_directories( SYSTEM "${VPX_INCLUDE_DIR}" )
-	set( PROJECT_LIBRARIES ${PROJECT_LIBRARIES} ${VPX_LIBRARIES} )
-else()
-	message( SEND_ERROR "Could not find libvpx" )
-endif()
-
+	include_directories("${CMAKE_SOURCE_DIR}/deps/libvpx")
+else ()
+	if( VPX_FOUND )
+		add_definitions( "-DUSE_LIBVPX=1" )
+		include_directories( SYSTEM "${VPX_INCLUDE_DIR}" )
+		set( PROJECT_LIBRARIES ${PROJECT_LIBRARIES} ${VPX_LIBRARIES} )
+	else()
+		message( SEND_ERROR "Could not find libvpx" )
+	endif()
+endif ()
 include_directories( SYSTEM "${BZIP2_INCLUDE_DIR}" "${LZMA_INCLUDE_DIR}" "${ZMUSIC_INCLUDE_DIR}" "${DRPC_INCLUDE_DIR}")
 
 if( ${HAVE_VM_JIT} )
@@ -513,16 +516,16 @@ else()
 endif()
 
 add_custom_command( OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/xlat_parser.c ${CMAKE_CURRENT_BINARY_DIR}/xlat_parser.h
-	COMMAND lemon -C${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/gamedata/xlat/xlat_parser.y
-	DEPENDS lemon ${CMAKE_CURRENT_SOURCE_DIR}/gamedata/xlat/xlat_parser.y )
+	COMMAND ${CMAKE_SOURCE_DIR}/tools/build/lemon/lemon -C${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/gamedata/xlat/xlat_parser.y
+	DEPENDS ${CMAKE_SOURCE_DIR}/tools/build/lemon/lemon ${CMAKE_CURRENT_SOURCE_DIR}/gamedata/xlat/xlat_parser.y )
 
 add_custom_command( OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/zcc-parse.c ${CMAKE_CURRENT_BINARY_DIR}/zcc-parse.h
-	COMMAND lemon -C${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/common/scripting/frontend/zcc-parse.lemon
-	DEPENDS lemon ${CMAKE_CURRENT_SOURCE_DIR}/common/scripting/frontend/zcc-parse.lemon )
+	COMMAND ${CMAKE_SOURCE_DIR}/tools/build/lemon/lemon -C${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/common/scripting/frontend/zcc-parse.lemon
+	DEPENDS ${CMAKE_SOURCE_DIR}/tools/build/lemon/lemon ${CMAKE_CURRENT_SOURCE_DIR}/common/scripting/frontend/zcc-parse.lemon )
 
 add_custom_command( OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/sc_man_scanner.h
-	COMMAND re2c --no-generation-date -s -o ${CMAKE_CURRENT_BINARY_DIR}/sc_man_scanner.h ${CMAKE_CURRENT_SOURCE_DIR}/common/engine/sc_man_scanner.re
-	DEPENDS re2c ${CMAKE_CURRENT_SOURCE_DIR}/common/engine/sc_man_scanner.re )
+	COMMAND ${CMAKE_SOURCE_DIR}/tools/build/re2c/re2c --no-generation-date -s -o ${CMAKE_CURRENT_BINARY_DIR}/sc_man_scanner.h ${CMAKE_CURRENT_SOURCE_DIR}/common/engine/sc_man_scanner.re
+	DEPENDS ${CMAKE_SOURCE_DIR}/tools/build/re2c/re2c ${CMAKE_CURRENT_SOURCE_DIR}/common/engine/sc_man_scanner.re )
 
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 
@@ -1285,6 +1288,24 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "SunOS")
 	# [BL] Solaris requires these to be explicitly linked.
 	set( PROJECT_LIBRARIES ${PROJECT_LIBRARIES} nsl socket)
 endif()
+
+if(CMAKE_SYSTEM MATCHES "Emscripten")
+	target_link_libraries(zdoom ${CMAKE_SOURCE_DIR}/deps/libvpx/libvpx.a)
+	target_link_libraries(zdoom ${CMAKE_SOURCE_DIR}/deps/target/lib/libglib-2.0.a)
+
+	target_link_options(zdoom PRIVATE "-sMODULARIZE"
+			"-sEXPORT_ALL"
+			"-sENVIRONMENT=web"
+			"-sEXPORTED_RUNTIME_METHODS=callMain,addRunDependency,removeRunDependency"
+			"-lidbfs.js"
+			"-sEXIT_RUNTIME"
+			"-sINITIAL_MEMORY=256mb"
+			"-sNO_DISABLE_EXCEPTION_CATCHING"
+			"-sMAX_WEBGL_VERSION=2" "-sMIN_WEBGL_VERSION=2" "-sFULL_ES2"
+			"-g" "-gsource-map" "-sASSERTIONS=2" "--profiling-funcs" "-fdebug-prefix-map=/mnt=/Users")
+
+	target_compile_options(zdoom PUBLIC "-g" "-gsource-map" "-fdebug-prefix-map=/mnt=/Users")
+endif ()
 
 if( UNIX )
 	find_package( Backtrace )

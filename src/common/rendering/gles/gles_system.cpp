@@ -202,8 +202,11 @@ namespace OpenGLESRenderer
 		if (gles.glesMode == GLES_MODE_GLES)
 		{
 			Printf("GLES choosing mode: GLES_MODE_GLES\n");
-
+#if __EMSCRIPTEN__
+			gles.shaderVersionString = "300 es";
+#else
 			gles.shaderVersionString = "100";
+#endif
 			gles.depthStencilAvailable = CheckExtension("GL_OES_packed_depth_stencil");
 			gles.npotAvailable = CheckExtension("GL_OES_texture_npot");
 			gles.depthClampAvailable = CheckExtension("GL_EXT_depth_clamp");

@@ -155,9 +155,13 @@ target_include_directories ( fluidsynth PRIVATE
 
 
 if (NOT WIN32)
-   find_package(PkgConfig REQUIRED)
-   pkg_search_module(GLIB REQUIRED glib-2.0)
-   target_include_directories ( fluidsynth PUBLIC ${GLIB_INCLUDE_DIRS} )
-   target_link_libraries ( fluidsynth PUBLIC ${pkgcfg_lib_GLIB_glib-2.0} )
-
+    if(CMAKE_SYSTEM MATCHES "Emscripten")
+        target_include_directories(fluidsynth PUBLIC ${CMAKE_SOURCE_DIR}/deps/target/include/glib-2.0)
+        target_include_directories(fluidsynth PUBLIC ${CMAKE_SOURCE_DIR}/deps/target/lib/glib-2.0/include)
+    else ()
+       find_package(PkgConfig REQUIRED)
+       pkg_search_module(GLIB REQUIRED glib-2.0)
+       target_include_directories ( fluidsynth PUBLIC ${GLIB_INCLUDE_DIRS} )
+       target_link_libraries ( fluidsynth PUBLIC ${pkgcfg_lib_GLIB_glib-2.0} )
+    endif ()
 endif()
