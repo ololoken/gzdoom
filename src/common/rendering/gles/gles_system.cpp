@@ -162,7 +162,9 @@ namespace OpenGLESRenderer
 		}
 		const char* glVersionStr = (const char*)glGetString(GL_VERSION);
 		double glVersion = strtod(glVersionStr, NULL);
-
+#if __EMSCRIPTEN__
+		glVersion = 3.3f;
+#endif
 		Printf("GL Version parsed = %f\n", glVersion);
 
 		gles.flags = RFL_NO_CLIP_PLANES;
@@ -197,16 +199,15 @@ namespace OpenGLESRenderer
 			else
 				gles.glesMode = GLES_MODE_OGL2; // Below 3.3
 		}
-
+#if __EMSCRIPTEN__
+		gles.glesMode = GLES_MODE_WEBGL;
+#endif
 
 		if (gles.glesMode == GLES_MODE_GLES)
 		{
 			Printf("GLES choosing mode: GLES_MODE_GLES\n");
-#if __EMSCRIPTEN__
-			gles.shaderVersionString = "300 es";
-#else
+
 			gles.shaderVersionString = "100";
-#endif
 			gles.depthStencilAvailable = CheckExtension("GL_OES_packed_depth_stencil");
 			gles.npotAvailable = CheckExtension("GL_OES_texture_npot");
 			gles.depthClampAvailable = CheckExtension("GL_EXT_depth_clamp");
@@ -231,6 +232,17 @@ namespace OpenGLESRenderer
 			gles.depthStencilAvailable = true;
 			gles.npotAvailable = true;
 			gles.useMappedBuffers = true;
+			gles.depthClampAvailable = true;
+			gles.anistropicFilterAvailable = true;
+		}
+		else if (gles.glesMode == GLES_MODE_WEBGL)
+		{
+			Printf("GLES choosing mode: GLES_MODE_WEBGL\n");
+
+			gles.shaderVersionString = "300 es";
+			gles.depthStencilAvailable = true;
+			gles.npotAvailable = false;
+			gles.useMappedBuffers = false;
 			gles.depthClampAvailable = true;
 			gles.anistropicFilterAvailable = true;
 		}

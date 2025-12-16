@@ -1,5 +1,5 @@
 
-in vec4 aPosition;
+in vec3 aPosition;
 in vec2 aTexCoord;
 in vec4 aColor;
 
@@ -7,12 +7,12 @@ out vec4 vTexCoord;
 out vec4 vColor;
 
 #ifndef SIMPLE	// we do not need these for simple shaders
-in vec4 aVertex2;
+in vec3 aVertex2;
 in vec4 aNormal;
 in vec4 aNormal2;
 #if __VERSION__ >= 300
 in vec4 aBoneWeight;
-in uvec4 aBoneSelector;
+//in uvec4 aBoneSelector;
 #endif
 
 out vec4 pixelpos;
@@ -49,7 +49,7 @@ void main()
 	parmPosition = bones.Position;
 	
 	#ifndef SIMPLE
-		vec4 worldcoord = ModelMatrix * mix(parmPosition, aVertex2, uInterpolationFactor);
+		vec4 worldcoord = ModelMatrix * mix(parmPosition, vec4(aVertex2, 1.0), uInterpolationFactor);
 	#else
 		vec4 worldcoord = ModelMatrix * parmPosition;
 	#endif
@@ -161,7 +161,7 @@ void AddWeightedBone(uint boneIndex, float weight, inout vec4 position, inout ve
 	{
 		mat4 transform = bones[uBoneIndexBase + int(boneIndex)];
 		mat3 rotation = mat3(transform);
-		position += (transform * aPosition) * weight;
+		position += (transform * vec4(aPosition, 1.0)) * weight;
 		normal += (rotation * aNormal.xyz) * weight;
 	}
 }
@@ -179,16 +179,16 @@ BonesResult ApplyBones()
 		float weightMultiplier = 1.0 / totalWeight;
 		vec4 boneWeight = aBoneWeight * weightMultiplier;
 
-		AddWeightedBone(aBoneSelector.x, boneWeight.x, result.Position, result.Normal);
-		AddWeightedBone(aBoneSelector.y, boneWeight.y, result.Position, result.Normal);
-		AddWeightedBone(aBoneSelector.z, boneWeight.z, result.Position, result.Normal);
-		AddWeightedBone(aBoneSelector.w, boneWeight.w, result.Position, result.Normal);
+		//AddWeightedBone(aBoneSelector.x, boneWeight.x, result.Position, result.Normal);
+		//AddWeightedBone(aBoneSelector.y, boneWeight.y, result.Position, result.Normal);
+		//AddWeightedBone(aBoneSelector.z, boneWeight.z, result.Position, result.Normal);
+		//AddWeightedBone(aBoneSelector.w, boneWeight.w, result.Position, result.Normal);
 
 		result.Position.w = 1.0; // For numerical stability
 	}
 	else
 	{
-		result.Position = aPosition;
+		result.Position = vec4(aPosition, 1.0);
 		result.Normal = GetAttrNormal();
 	}
 	return result;
@@ -200,7 +200,7 @@ BonesResult ApplyBones()
 {
 	BonesResult result;
 	
-	result.Position = aPosition;
+	result.Position = vec4(aPosition, 1.0);
 	result.Normal = GetAttrNormal();
 	
 	return result;
@@ -212,7 +212,7 @@ BonesResult ApplyBones()
 BonesResult ApplyBones()
 {
 	BonesResult result;
-	result.Position = aPosition;
+	result.Position = vec4(aPosition, 1.0);
 	return result;
 }
 

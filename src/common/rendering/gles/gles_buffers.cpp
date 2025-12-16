@@ -279,6 +279,13 @@ void GLVertexBuffer::SetFormat(int numBindingPoints, int numAttributes, size_t s
 	mStride = stride;
 	mNumBindingPoints = numBindingPoints;
 
+
+	// Clear to avoid stale attributes from previous formats
+	for (int i = 0; i < VATTR_MAX; i++)
+	{
+		mAttributeInfo[i].size = 0;
+	}
+
 	for(int i = 0; i < numAttributes; i++)
 	{
 		if (attrs[i].location >= 0 && attrs[i].location < VATTR_MAX)

@@ -1293,7 +1293,9 @@ if(CMAKE_SYSTEM MATCHES "Emscripten")
 	target_link_libraries(zdoom ${CMAKE_SOURCE_DIR}/deps/libvpx/libvpx.a)
 	target_link_libraries(zdoom ${CMAKE_SOURCE_DIR}/deps/target/lib/libglib-2.0.a)
 
-	target_link_options(zdoom PRIVATE "-sMODULARIZE"
+	target_link_options(zdoom PRIVATE
+			"-sALLOW_MEMORY_GROWTH"
+			"-sMODULARIZE"
 			"-sEXPORT_ALL"
 			"-sENVIRONMENT=web"
 			"-sEXPORTED_RUNTIME_METHODS=callMain,addRunDependency,removeRunDependency"
