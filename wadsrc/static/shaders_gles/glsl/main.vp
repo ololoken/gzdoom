@@ -12,7 +12,7 @@ in vec4 aNormal;
 in vec4 aNormal2;
 #if __VERSION__ >= 300
 in vec4 aBoneWeight;
-//in uvec4 aBoneSelector;
+in vec4 aBoneSelector;
 #endif
 
 out vec4 pixelpos;
@@ -179,10 +179,10 @@ BonesResult ApplyBones()
 		float weightMultiplier = 1.0 / totalWeight;
 		vec4 boneWeight = aBoneWeight * weightMultiplier;
 
-		//AddWeightedBone(aBoneSelector.x, boneWeight.x, result.Position, result.Normal);
-		//AddWeightedBone(aBoneSelector.y, boneWeight.y, result.Position, result.Normal);
-		//AddWeightedBone(aBoneSelector.z, boneWeight.z, result.Position, result.Normal);
-		//AddWeightedBone(aBoneSelector.w, boneWeight.w, result.Position, result.Normal);
+		AddWeightedBone(uint(aBoneSelector.x), boneWeight.x, result.Position, result.Normal);
+		AddWeightedBone(uint(aBoneSelector.y), boneWeight.y, result.Position, result.Normal);
+		AddWeightedBone(uint(aBoneSelector.z), boneWeight.z, result.Position, result.Normal);
+		AddWeightedBone(uint(aBoneSelector.w), boneWeight.w, result.Position, result.Normal);
 
 		result.Position.w = 1.0; // For numerical stability
 	}

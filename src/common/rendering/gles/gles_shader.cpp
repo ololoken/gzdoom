@@ -534,7 +534,7 @@ bool FShader::Load(const char * name, const char * vert_prog_lump_, const char *
 		glBindAttribLocation(shaderData->hShader, VATTR_NORMAL, "aNormal");
 		glBindAttribLocation(shaderData->hShader, VATTR_NORMAL2, "aNormal2");
 		glBindAttribLocation(shaderData->hShader, VATTR_BONEWEIGHT, "aBoneWeight");
-		//glBindAttribLocation(shaderData->hShader, VATTR_BONESELECTOR, "aBoneSelector");
+		glBindAttribLocation(shaderData->hShader, VATTR_BONESELECTOR, "aBoneSelector");
 
 
 		glLinkProgram(shaderData->hShader);

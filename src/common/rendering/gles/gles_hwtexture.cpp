@@ -144,6 +144,20 @@ unsigned int FHardwareTexture::CreateTexture(unsigned char * buffer, int w, int 
 			texformat = GL_BGRA;
 		}
 	}
+	else if (gles.glesMode == GLES_MODE_WEBGL)
+	{
+		if (glTextureBytes == 1)
+		{
+			sourcetype = GL_RGB;
+			texformat = GL_RGB;
+		}
+		else
+		{
+			sourcetype = GL_RGBA;
+			texformat = GL_RGBA;
+		}
+
+	}
 	else
 	{
 		if (glTextureBytes == 1) //Use Red channel instread becuase Alpha does not work in OpenGL, swizzle later
@@ -158,10 +172,6 @@ unsigned int FHardwareTexture::CreateTexture(unsigned char * buffer, int w, int 
 			texformat = GL_RGBA;
 		}
 	}
-#if __EMSCRIPTEN__
-	sourcetype = GL_RGBA;
-	texformat = GL_RGBA;
-#endif
 
 	glTexImage2D(GL_TEXTURE_2D, 0, texformat, rw, rh, 0, sourcetype, GL_UNSIGNED_BYTE, buffer);
 

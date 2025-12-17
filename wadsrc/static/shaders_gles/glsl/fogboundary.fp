@@ -1,5 +1,5 @@
 in vec4 pixelpos;
-
+out vec4 outFragColor;
 //===========================================================================
 //
 // Main shader routine
@@ -25,6 +25,6 @@ void main()
 #endif
 	fogfactor = exp2 (uFogDensity * fogdist);
 	
-	gl_FragColor = vec4(uFogColor.rgb, 1.0 - fogfactor);
+	outFragColor = vec4(uFogColor.rgb, 1.0 - fogfactor);
 }
 
