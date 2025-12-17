@@ -153,6 +153,13 @@ unsigned int FHardwareTexture::CreateTexture(unsigned char * buffer, int w, int 
 		}
 		else
 		{
+			for (int i = 0; i < rw*rh; ++i) {//todo: (ololoken) consider shader fix `outFragColor = color.brga`
+				uint8_t *p = buffer + i * 4;
+
+				uint8_t b = p[0];  // B
+				p[0] = p[2];       // R
+				p[2] = b;          // B
+			}
 			sourcetype = GL_RGBA;
 			texformat = GL_RGBA;
 		}
