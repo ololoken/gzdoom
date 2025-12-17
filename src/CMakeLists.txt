@@ -1299,7 +1299,7 @@ if(CMAKE_SYSTEM MATCHES "Emscripten")
 			"-sEXPORT_ALL"
 			"-sENVIRONMENT=web"
 			"-sEXPORTED_RUNTIME_METHODS=callMain,addRunDependency,removeRunDependency"
-			"-lidbfs.js"
+			"-lidbfs.js" "-lopenal"
 			"-sEXIT_RUNTIME"
 			"-sINITIAL_MEMORY=256mb"
 			"-sNO_DISABLE_EXCEPTION_CATCHING"

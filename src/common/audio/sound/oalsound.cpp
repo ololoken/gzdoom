@@ -83,7 +83,7 @@ bool IsOpenALPresent()
 {
 #ifdef NO_OPENAL
 	return false;
-#elif !defined DYN_OPENAL
+#elif !defined DYN_OPENAL || defined __EMSCRIPTEN__
 	return true;
 #else
 	static bool cached_result = false;
@@ -734,7 +734,7 @@ OpenALSoundRenderer::OpenALSoundRenderer()
 	const int numChannels = max<int>(snd_channels, 2);
 	int numSources = numMono + numStereo;
 
-	if (0 == numSources)
+	if (0 >= numSources)
 	{
 		numSources = numChannels;
 	}
