@@ -148,8 +148,17 @@ unsigned int FHardwareTexture::CreateTexture(unsigned char * buffer, int w, int 
 	{
 		if (glTextureBytes == 1)
 		{
-			sourcetype = GL_RGB;
-			texformat = GL_RGB;
+			unsigned char * rgbabuffer=(unsigned char *)calloc(4,rw * (rh+1));
+			deletebuffer = true;
+			for (int i = 0; i < rw * rh; i++) {
+				rgbabuffer[i * 4 + 0] = 255;          // R
+				rgbabuffer[i * 4 + 1] = 255;          // G
+				rgbabuffer[i * 4 + 2] = 255;          // B
+				rgbabuffer[i * 4 + 3] = buffer[i];    // A
+			}
+			buffer = rgbabuffer;
+			sourcetype = GL_RGBA;
+			texformat = GL_RGBA;
 		}
 		else
 		{

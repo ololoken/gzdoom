@@ -34,6 +34,9 @@
 
 #include <functional>
 #include <chrono>
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 
 #include "c_cvars.h"
 
@@ -246,7 +249,9 @@ class OpenALSoundStream : public SoundStream
 		alSourcef(Source, AL_MAX_GAIN, 1.f);
 		alSourcef(Source, AL_GAIN, 1.f);
 		alSourcef(Source, AL_PITCH, 1.f);
+#ifndef __EMSCRIPTEN__
 		alSourcef(Source, AL_DOPPLER_FACTOR, 0.f);
+#endif
 		alSourcef(Source, AL_ROLLOFF_FACTOR, 0.f);
 		alSourcef(Source, AL_SEC_OFFSET, 0.f);
 		alSourcei(Source, AL_SOURCE_RELATIVE, AL_TRUE);
@@ -923,6 +928,7 @@ OpenALSoundRenderer::~OpenALSoundRenderer()
 
 void OpenALSoundRenderer::BackgroundProc()
 {
+#ifndef __EMSCRIPTEN__
 	std::unique_lock<std::mutex> lock(StreamLock);
 	while(!QuitThread.load())
 	{
@@ -934,11 +940,14 @@ void OpenALSoundRenderer::BackgroundProc()
 		else
 		{
 			// Else, process all active streams and sleep for 100ms
+#endif
 			for(size_t i = 0;i < Streams.Size();i++)
 				Streams[i]->Process();
+#ifndef __EMSCRIPTEN__
 			StreamWake.wait_for(lock, std::chrono::milliseconds(100));
 		}
 	}
+#endif
 }
 
 void OpenALSoundRenderer::AddStream(OpenALSoundStream *stream)
@@ -1211,11 +1220,22 @@ void OpenALSoundRenderer::UnloadSound(SoundHandle sfx)
 	getALError();
 }
 
+#ifdef __EMSCRIPTEN__
+void AsyncBackgroundProc(OpenALSoundRenderer *renderer)
+{
+	renderer->BackgroundProc();
+}
+#endif
 
 SoundStream *OpenALSoundRenderer::CreateStream(SoundStreamCallback callback, int buffbytes, SampleType stype, ChannelConfig chans, int samplerate, void *userdata)
 {
+#ifndef __EMSCRIPTEN__
 	if(StreamThread.get_id() == std::thread::id())
 		StreamThread = std::thread(std::mem_fn(&OpenALSoundRenderer::BackgroundProc), this);
+#else
+	//auto backgroundProc = std::bind(&OpenALSoundRenderer::BackgroundProc, this);
+	EM_ASM({ setInterval(() => dynCall('vp', $0, [$1]), 100) }, &AsyncBackgroundProc, this);
+#endif
 	OpenALSoundStream *stream = new OpenALSoundStream(this);
 	if (!stream->Init(callback, buffbytes, stype, chans, samplerate, userdata))
 	{
@@ -1247,7 +1267,9 @@ FISoundChannel *OpenALSoundRenderer::StartSound(SoundHandle sfx, float vol, floa
 
 	alSourcef(source, AL_REFERENCE_DISTANCE, 1.f);
 	alSourcef(source, AL_MAX_DISTANCE, 1000.f);
+#ifndef __EMSCRIPTEN__
 	alSourcef(source, AL_DOPPLER_FACTOR, 0.f);
+#endif
 	alSourcef(source, AL_ROLLOFF_FACTOR, 0.f);
 	alSourcef(source, AL_MAX_GAIN, SfxVolume);
 	alSourcef(source, AL_GAIN, SfxVolume*vol);
@@ -1413,7 +1435,9 @@ FISoundChannel *OpenALSoundRenderer::StartSound3D(SoundHandle sfx, SoundListener
 	}
 	alSource3f(source, AL_VELOCITY, vel[0], vel[1], -vel[2]);
 	alSource3f(source, AL_DIRECTION, 0.f, 0.f, 0.f);
+#ifndef __EMSCRIPTEN__
 	alSourcef(source, AL_DOPPLER_FACTOR, 0.f);
+#endif
 	if(AL.EXT_SOURCE_RADIUS)
 		alSourcef(source, AL_SOURCE_RADIUS, (chanflags&SNDF_AREA) ? AREA_SOUND_RADIUS : 0.f);
 

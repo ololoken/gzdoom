@@ -17,8 +17,14 @@
 #include "thirdparty/al.h"
 #include "thirdparty/alc.h"
 #else
+#if __EMSCRIPTEN__
+#define AL_NO_PROTOTYPES
+#include "thirdparty/al.h"
+#include "thirdparty/alc.h"
+#else
 #include "al.h"
 #include "alc.h"
+#endif
 #endif
 
 #include "thirdparty/alext.h"
@@ -151,8 +157,13 @@ private:
 
     void (ALC_APIENTRY*alcDevicePauseSOFT)(ALCdevice *device);
     void (ALC_APIENTRY*alcDeviceResumeSOFT)(ALCdevice *device);
-
+#ifdef __EMSCRIPTEN__
+public:
+#endif
     void BackgroundProc();
+#ifdef __EMSCRIPTEN__
+private:
+#endif
     void AddStream(OpenALSoundStream *stream);
     void RemoveStream(OpenALSoundStream *stream);
 
