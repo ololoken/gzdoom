@@ -1294,26 +1294,24 @@ if(CMAKE_SYSTEM MATCHES "Emscripten")
 	target_link_libraries(zdoom ${CMAKE_SOURCE_DIR}/deps/target/lib/libglib-2.0.a)
 
 	target_link_options(zdoom PRIVATE
-			"-sASYNCIFY"
 			"-sSTACK_SIZE=8MB"
-			"-O2"
 			"-sALLOW_MEMORY_GROWTH"
 			"-sMODULARIZE"
 			"-sEXPORT_ALL"
 			"-sENVIRONMENT=web"
 			"-sEXPORTED_RUNTIME_METHODS=callMain,addRunDependency,removeRunDependency"
-			"-lidbfs.js" "-lopenal"
+			"-lidbfs.js"
 			"-sEXIT_RUNTIME"
 			"-sINITIAL_MEMORY=256mb"
 			"-sNO_DISABLE_EXCEPTION_CATCHING"
 			"-sMAX_WEBGL_VERSION=2" "-sMIN_WEBGL_VERSION=2" "-sFULL_ES2"
-#			"-g" "-gsource-map" "-sASSERTIONS=2" "--profiling-funcs" "-fdebug-prefix-map=/mnt=/Users"
 	)
 
-	target_compile_options(zdoom PUBLIC
-			"-O2"
-#			"-g" "-gsource-map" "-fdebug-prefix-map=/mnt=/Users"
-	)
+	target_link_options(zdoom PRIVATE "$<$<CONFIG:RELEASE>:-O2>")
+	target_link_options(zdoom PRIVATE "$<$<CONFIG:DEBUG>:-g -gsource-map -sASSERTIONS=2 --profiling-funcs>")
+
+	target_compile_options(zdoom PRIVATE "$<$<CONFIG:RELEASE>:-O2>")
+	target_compile_options(zdoom PRIVATE "$<$<CONFIG:DEBUG>:-g -gsource-map>")
 endif ()
 
 if( UNIX )
