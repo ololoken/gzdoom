@@ -1362,12 +1362,8 @@ void SoundEngine::ChannelEnded(FISoundChannel *ichan)
 		}
 		else
 		{
-#ifndef __EMSCRIPTEN__ // todo: (ololoken) check error in alGetSourcei(GET_PTRID(chan->SysChannel), AL_SAMPLE_OFFSET, &pos);
 			unsigned int pos = GSnd->GetPosition(schan);
 			unsigned int len = GSnd->GetSampleLength(S_sfx[schan->SoundID.index()].data);
-#else
-			int pos = 0, len = 0;
-#endif
 
 			if (pos == 0)
 			{
