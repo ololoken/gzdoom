@@ -1301,17 +1301,22 @@ if(CMAKE_SYSTEM MATCHES "Emscripten")
 			"-sENVIRONMENT=web"
 			"-sEXPORTED_RUNTIME_METHODS=callMain,addRunDependency,removeRunDependency"
 			"-lidbfs.js"
+			$<$<NOT:$<BOOL:${DYN_SNDFILE}>>:-L/root/emsdk/upstream/emscripten/cache/sysroot/lib/ -lFLAC -lvorbis -lvorbisfile -lopus -logg>
 			"-sEXIT_RUNTIME"
 			"-sINITIAL_MEMORY=256mb"
 			"-sNO_DISABLE_EXCEPTION_CATCHING"
 			"-sMAX_WEBGL_VERSION=2" "-sMIN_WEBGL_VERSION=2" "-sFULL_ES2"
 	)
 
-	target_link_options(zdoom PRIVATE "$<$<CONFIG:RELEASE>:-O2>")
-	target_link_options(zdoom PRIVATE "$<$<CONFIG:DEBUG>:-g -gsource-map -sASSERTIONS=2 --profiling-funcs>")
+	target_link_options(zdoom PRIVATE
+			$<$<CONFIG:RELEASE>:-O2>
+			$<$<CONFIG:DEBUG>:-g -gsource-map -fdebug-prefix-map=/mnt=/Users -sASSERTIONS=2 --profiling-funcs>
+	)
 
-	target_compile_options(zdoom PRIVATE "$<$<CONFIG:RELEASE>:-O2>")
-	target_compile_options(zdoom PRIVATE "$<$<CONFIG:DEBUG>:-g -gsource-map>")
+	target_compile_options(zdoom PRIVATE
+			$<$<CONFIG:RELEASE>:-O2>
+			$<$<CONFIG:DEBUG>:-g -gsource-map -fdebug-prefix-map=/mnt=/Users>
+	)
 endif ()
 
 if( UNIX )

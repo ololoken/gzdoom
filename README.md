@@ -1,3 +1,25 @@
+# This is GZDoom fork for browser platform. Emscripten support
+
+cmake options
+```
+-DHAVE_VULKAN=OFF -DHAVE_GLES2=ON -DDYN_OPENAL=OFF -DBUILD_SHARED_LIBS=OFF -DHAVE_VM_JIT=OFF -DNO_GTK=ON -DDYN_GTK=OFF -DNO_OPENAL=OFF -DDYN_SNDFILE=OFF -DDYN_MPG123=OFF
+```
+
+If you need not just midi support build libsndfile.
+
+Also it might require manual gzdoom.js library patching:
+
+```js
+        case 0x1025 /* AL_SAMPLE_OFFSET */:
+          var offset = AL.sourceTell(src);
+          if (offset > 0.0) {
+            offset *= src.bufQueue[0].frequency;
+          }
+          return Math.round(offset); // !here: operation with numbers in js format sometimes leads to values like xxx.99999999998 
+                                     // and we don't want write floats into int output
+```
+
+
 # Welcome to GZDoom!
 
 [![Continuous Integration](https://github.com/ZDoom/gzdoom/actions/workflows/continuous_integration.yml/badge.svg)](https://github.com/ZDoom/gzdoom/actions/workflows/continuous_integration.yml)

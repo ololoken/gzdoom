@@ -57,7 +57,7 @@ EXTERN_CVAR(Bool, r_radarclipper)
 EXTERN_CVAR(Bool, r_dithertransparency)
 
 thread_local bool isWorkerThread;
-#ifndef __EMSCRIPTEN__
+#if defined(__EMSCRIPTEN_PTHREADS__) || !defined(__EMSCRIPTEN__)
 ctpl::thread_pool renderPool(1);
 #endif
 bool inited = false;
@@ -1028,7 +1028,7 @@ void HWDrawInfo::RenderBSP(void *node, bool drawpsprites)
 	}
 
 	validcount++;	// used for processing sidedefs only once by the renderer.
-#ifndef __EMSCRIPTEN__
+#if defined(__EMSCRIPTEN_PTHREADS__) || !defined(__EMSCRIPTEN__)
 	multithread = gl_multithread;
 	if (multithread)
 	{

@@ -930,7 +930,7 @@ OpenALSoundRenderer::~OpenALSoundRenderer()
 
 void OpenALSoundRenderer::BackgroundProc()
 {
-#ifndef __EMSCRIPTEN__
+#if defined(__EMSCRIPTEN_PTHREADS__) || !defined(__EMSCRIPTEN__)
 	std::unique_lock<std::mutex> lock(StreamLock);
 	while(!QuitThread.load())
 	{
@@ -942,17 +942,13 @@ void OpenALSoundRenderer::BackgroundProc()
 		else
 		{
 			// Else, process all active streams and sleep for 100ms
-#else
-	std::unique_lock<std::mutex> lock(StreamLock);
 #endif
 			for(size_t i = 0;i < Streams.Size();i++)
 				Streams[i]->Process();
-#ifndef __EMSCRIPTEN__
+#if defined(__EMSCRIPTEN_PTHREADS__) || !defined(__EMSCRIPTEN__)
 			StreamWake.wait_for(lock, std::chrono::milliseconds(100));
 		}
 	}
-#else
-	lock.unlock();
 #endif
 }
 
@@ -963,6 +959,9 @@ void OpenALSoundRenderer::AddStream(OpenALSoundStream *stream)
 	lock.unlock();
 	// There's a stream to play, make sure the background thread is aware
 	StreamWake.notify_all();
+#if !defined(__EMSCRIPTEN_PTHREADS__) && defined(__EMSCRIPTEN__)
+	EM_ASM({ Module.SoundStreamsWorker() });
+#endif
 }
 
 void OpenALSoundRenderer::RemoveStream(OpenALSoundStream *stream)
@@ -1226,7 +1225,7 @@ void OpenALSoundRenderer::UnloadSound(SoundHandle sfx)
 	getALError();
 }
 
-#ifdef __EMSCRIPTEN__
+#if !defined(__EMSCRIPTEN_PTHREADS__) && defined(__EMSCRIPTEN__)
 void AsyncBackgroundProc(OpenALSoundRenderer *renderer)
 {
 	renderer->BackgroundProc();
@@ -1235,11 +1234,21 @@ void AsyncBackgroundProc(OpenALSoundRenderer *renderer)
 
 SoundStream *OpenALSoundRenderer::CreateStream(SoundStreamCallback callback, int buffbytes, SampleType stype, ChannelConfig chans, int samplerate, void *userdata)
 {
-#ifndef __EMSCRIPTEN__
+#if defined(__EMSCRIPTEN_PTHREADS__) || !defined(__EMSCRIPTEN__)
 	if(StreamThread.get_id() == std::thread::id())
 		StreamThread = std::thread(std::mem_fn(&OpenALSoundRenderer::BackgroundProc), this);
 #else
-	EM_ASM({ setInterval(() => dynCall('vp', $0, [$1]), 100) }, &AsyncBackgroundProc, this);
+	EM_ASM({
+		if (Module.SoundStreamsWorker) return;
+		let running = false;
+		Module.SoundStreamsWorker = function () {
+			if (running) return;
+			running = true;
+			dynCall('vp', $0, [$1]);
+			running = false;
+		};
+		setInterval(Module.SoundStreamsWorker, 100);
+	}, &AsyncBackgroundProc, this);
 #endif
 	OpenALSoundStream *stream = new OpenALSoundStream(this);
 	if (!stream->Init(callback, buffbytes, stype, chans, samplerate, userdata))

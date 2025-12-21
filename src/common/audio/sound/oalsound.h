@@ -157,11 +157,11 @@ private:
 
     void (ALC_APIENTRY*alcDevicePauseSOFT)(ALCdevice *device);
     void (ALC_APIENTRY*alcDeviceResumeSOFT)(ALCdevice *device);
-#ifdef __EMSCRIPTEN__
+#if !defined(__EMSCRIPTEN_PTHREADS__) && defined(__EMSCRIPTEN__)
 public:
 #endif
     void BackgroundProc();
-#ifdef __EMSCRIPTEN__
+#if !defined(__EMSCRIPTEN_PTHREADS__) && defined(__EMSCRIPTEN__)
 private:
 #endif
     void AddStream(OpenALSoundStream *stream);
