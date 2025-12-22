@@ -306,7 +306,9 @@ void I_PrintStr(const char *cp)
 	if (StartWindow) CleanProgressBar();
 	fputs(printData.GetChars(),stdout);
 	if (terminal) fputs("\033[0m",stdout);
+#ifndef __EMSCRIPTEN__
 	if (StartWindow) RedrawProgressBar(ProgressBarCurPos,ProgressBarMaxPos);
+#endif
 }
 
 bool HoldingQueryKey(const char* key)

@@ -142,7 +142,9 @@ FTTYStartupScreen::~FTTYStartupScreen()
 void FTTYStartupScreen::Progress(int advance)
 {
 	CurPos = min(CurPos + advance, MaxPos);
+#ifndef __EMSCRIPTEN__
 	RedrawProgressBar(CurPos, MaxPos);
+#endif
 }
 
 //===========================================================================

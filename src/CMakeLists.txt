@@ -1294,6 +1294,7 @@ if(CMAKE_SYSTEM MATCHES "Emscripten")
 	target_link_libraries(zdoom ${CMAKE_SOURCE_DIR}/deps/target/lib/libglib-2.0.a)
 
 	target_link_options(zdoom PRIVATE
+			-fPIC
 			"-sSTACK_SIZE=8MB"
 			"-sALLOW_MEMORY_GROWTH"
 			"-sMODULARIZE"
@@ -1306,14 +1307,12 @@ if(CMAKE_SYSTEM MATCHES "Emscripten")
 			"-sINITIAL_MEMORY=256mb"
 			"-sNO_DISABLE_EXCEPTION_CATCHING"
 			"-sMAX_WEBGL_VERSION=2" "-sMIN_WEBGL_VERSION=2" "-sFULL_ES2"
-	)
-
-	target_link_options(zdoom PRIVATE
 			$<$<CONFIG:RELEASE>:-O2>
 			$<$<CONFIG:DEBUG>:-g -gsource-map -fdebug-prefix-map=/mnt=/Users -sASSERTIONS=2 --profiling-funcs>
 	)
 
 	target_compile_options(zdoom PRIVATE
+			-fPIC
 			$<$<CONFIG:RELEASE>:-O2>
 			$<$<CONFIG:DEBUG>:-g -gsource-map -fdebug-prefix-map=/mnt=/Users>
 	)
