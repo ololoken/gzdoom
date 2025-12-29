@@ -92,6 +92,10 @@
 #include "i_interface.h"
 #include "fs_findfile.h"
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 
 static FRandom pr_dmspawn ("DMSpawn");
 static FRandom pr_pspawn ("PlayerSpawn");
@@ -2515,6 +2519,12 @@ void G_DoSaveGame (bool okForQuicksave, bool forceQuicksave, FString filename, c
 
 	if (succeeded)
 	{
+#ifdef __EMSCRIPTEN__
+		EM_ASM( { Module.callbacks?.onFileWrite?.({
+			path: UTF8ToString($0),
+			op: 'write'
+		}) }, filename.GetChars() );
+#endif
 		savegameManager.NotifyNewSave(filename, description, okForQuicksave, forceQuicksave);
 		BackupSaveName = filename;
 

@@ -68,6 +68,10 @@
 #include "gstrings.h"
 #include "vm.h"
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 FGameConfigFile *GameConfig;
 
 CVAR(Bool, screenshot_quiet, false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG);
@@ -286,6 +290,13 @@ bool M_SaveDefaults (const char *filename)
 	{
 		GameConfig->ChangePathName (filename);
 	}
+#ifdef __EMSCRIPTEN__
+	if (success)
+		EM_ASM( { Module.callbacks?.onFileWrite?.({
+			path: UTF8ToString($0),
+			op: 'write'
+		}) }, GameConfig->GetPathName() );
+#endif
 	return success;
 }
 

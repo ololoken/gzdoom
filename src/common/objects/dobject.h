@@ -164,7 +164,11 @@ public: \
 // address 0 keeps GCC from complaining about possible misuse of offsetof.
 // Using 8 to avoid unaligned pointer use.
 #define IMPLEMENT_POINTERS_START(cls)	const size_t cls::PointerOffsets[] = {
+#ifdef __EMSCRIPTEN__
+#define IMPLEMENT_POINTER(field)		((size_t)&((ThisClass*)4)->field) - 4,
+#else
 #define IMPLEMENT_POINTER(field)		((size_t)&((ThisClass*)8)->field) - 8,
+#endif
 #define IMPLEMENT_POINTERS_END			~(size_t)0 };
 
 // Possible arguments for the IMPLEMENT_CLASS macro

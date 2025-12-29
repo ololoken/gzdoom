@@ -1247,7 +1247,7 @@ void D_DoomLoopIteration (void* lasttic_)
 		// frame syncronous IO operations
 		if (gametic > lasttic)
 		{
-			lasttic = gametic;
+			*(int*)lasttic_ = gametic;
 			I_StartFrame ();
 		}
 		I_SetFrameTime();
@@ -1306,6 +1306,7 @@ void D_DoomLoop ()
 
 	vid_cursor->Callback();
 #if __EMSCRIPTEN__
+	EM_ASM({ Module.callbacks?.onReady?.() });
 	emscripten_set_main_loop_arg(&D_DoomLoopIteration, &lasttic, 0, true);
 #else
 	for (;;)
