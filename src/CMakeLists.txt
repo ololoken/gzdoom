@@ -1294,8 +1294,7 @@ if(CMAKE_SYSTEM MATCHES "Emscripten")
 	target_link_libraries(zdoom ${CMAKE_SOURCE_DIR}/deps/target/lib/libglib-2.0.a)
 
 	target_link_options(zdoom PRIVATE
-			-sASYNCIFY
-			-sASYNCIFY_STACK_SIZE=1MB
+			$<$<CONFIG:RELEASE>:-sASYNCIFY -sASYNCIFY_STACK_SIZE=1MB>
 			-fPIC
 			-sSTACK_SIZE=8MB
 			-sINITIAL_MEMORY=256MB
@@ -1310,9 +1309,9 @@ if(CMAKE_SYSTEM MATCHES "Emscripten")
 			-sMAX_WEBGL_VERSION=2
 			-sMIN_WEBGL_VERSION=2
 			-sFULL_ES2
-			$<$<NOT:$<BOOL:${DYN_SNDFILE}>>:-L/root/emsdk/upstream/emscripten/cache/sysroot/lib/ -lFLAC -lvorbis -lvorbisfile -lopus -logg>
+			$<$<NOT:$<BOOL:${DYN_SNDFILE}>>:-L$ENV{EMSDK}/upstream/emscripten/cache/sysroot/lib/ -lFLAC -lvorbis -lvorbisfile -lopus -logg>
 			$<$<CONFIG:RELEASE>:-O2>
-			$<$<CONFIG:DEBUG>:-g -gsource-map -fdebug-prefix-map=/mnt=/Users -sASSERTIONS=2 --profiling-funcs>
+			$<$<CONFIG:DEBUG>:-g -gsource-map -sASSERTIONS=2 --profiling-funcs>
 	)
 
 	target_compile_options(zdoom PRIVATE
